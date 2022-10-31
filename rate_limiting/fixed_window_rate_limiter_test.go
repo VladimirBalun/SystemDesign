@@ -9,27 +9,29 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLeakyBucketLimiter(t *testing.T) {
+func TestFixedWindowLimiter(t *testing.T) {
 	t.Parallel()
 
-	rateLimiter := NewLeakyBucketLimiter(context.Background(), 3, time.Second)
+	rateLimiter := NewFixedWindowLimiter(context.Background(), 3, 100*time.Millisecond)
 
 	assert.True(t, rateLimiter.Allow())
 	assert.True(t, rateLimiter.Allow())
 	assert.True(t, rateLimiter.Allow())
 	assert.False(t, rateLimiter.Allow())
 
-	time.Sleep(350 * time.Millisecond)
+	time.Sleep(150 * time.Millisecond)
 
+	assert.True(t, rateLimiter.Allow())
+	assert.True(t, rateLimiter.Allow())
 	assert.True(t, rateLimiter.Allow())
 	assert.False(t, rateLimiter.Allow())
 }
 
-func TestLeakyBucketLimiterWithGoroutines(t *testing.T) {
+func TestFixedWindowLimiterWithGoroutines(t *testing.T) {
 	t.Parallel()
 
 	goroutinesNumber := 10
-	rateLimiter := NewLeakyBucketLimiter(context.Background(), goroutinesNumber, time.Second)
+	rateLimiter := NewFixedWindowLimiter(context.Background(), goroutinesNumber, time.Second)
 
 	wg := sync.WaitGroup{}
 	wg.Add(goroutinesNumber)
@@ -44,11 +46,11 @@ func TestLeakyBucketLimiterWithGoroutines(t *testing.T) {
 	assert.False(t, rateLimiter.Allow())
 }
 
-func TestLeakyBucketLimiterWithCancel(t *testing.T) {
+func TestFixedWindowLimiterWithCancel(t *testing.T) {
 	t.Parallel()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	rateLimiter := NewLeakyBucketLimiter(ctx, 3, 500*time.Millisecond)
+	rateLimiter := NewFixedWindowLimiter(ctx, 3, 500*time.Millisecond)
 
 	assert.True(t, rateLimiter.Allow())
 	assert.True(t, rateLimiter.Allow())
