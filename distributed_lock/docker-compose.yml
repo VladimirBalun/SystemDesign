@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  storage:
+    image: 'bitnami/redis:latest'
+    ports:
+      - '6379:6379'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - default
+  distribute_locker:
+    build: .
+    depends_on:
+      - storage
+    ports:
+      - '4060:4060'
+    environment:
+      - STORAGE_ADDRESS="storage:6379"
+      - SERVER_ADDRESS=":4060"
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
