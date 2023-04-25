@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 
@@ -36,29 +35,20 @@ func main() {
 		Handler: router,
 	}
 
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-
 	go func() {
-		defer wg.Done()
 		err = server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
 			log.Fatalf("failed to start server: %s", err.Error())
 		}
 	}()
 
-	go func() {
-		defer wg.Done()
-		<-ctx.Done()
+	<-ctx.Done()
 
-		const shutdownTimeout = 5 * time.Second
-		ctx, cancel = context.WithTimeout(context.Background(), shutdownTimeout)
-		defer cancel()
+	const shutdownTimeout = 3 * time.Second
+	ctx, cancel = context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
 
-		if err = server.Shutdown(ctx); err != nil {
-			log.Fatalf("server gracefull shutdown failed: %s", err.Error())
-		}
-	}()
-
-	wg.Wait()
+	if err = server.Shutdown(ctx); err != nil {
+		log.Fatalf("server gracefull shutdown failed: %s", err.Error())
+	}
 }
