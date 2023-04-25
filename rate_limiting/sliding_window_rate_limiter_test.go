@@ -8,17 +8,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSlidingLogLimiter(t *testing.T) {
+func TestSlidingWindowLimiter(t *testing.T) {
 	t.Parallel()
 
-	rateLimiter := NewSlidingLogLimiter(3, 100*time.Millisecond)
+	rateLimiter := NewSlidingWindowLimiter(7, time.Second)
+
+	time.Sleep(300 * time.Millisecond)
 
 	assert.True(t, rateLimiter.Allow())
 	assert.True(t, rateLimiter.Allow())
 	assert.True(t, rateLimiter.Allow())
-	assert.False(t, rateLimiter.Allow())
+	assert.True(t, rateLimiter.Allow())
+	assert.True(t, rateLimiter.Allow())
 
-	time.Sleep(150 * time.Millisecond)
+	time.Sleep(700 * time.Millisecond)
 
 	assert.True(t, rateLimiter.Allow())
 	assert.True(t, rateLimiter.Allow())
@@ -26,11 +29,11 @@ func TestSlidingLogLimiter(t *testing.T) {
 	assert.False(t, rateLimiter.Allow())
 }
 
-func TestSlidingLogLimiterWithGoroutines(t *testing.T) {
+func TestSlidingWindowLimiterWithGoroutines(t *testing.T) {
 	t.Parallel()
 
 	goroutinesNumber := 10
-	rateLimiter := NewSlidingLogLimiter(goroutinesNumber, time.Second)
+	rateLimiter := NewSlidingWindowLimiter(goroutinesNumber, time.Second)
 
 	wg := sync.WaitGroup{}
 	wg.Add(goroutinesNumber)

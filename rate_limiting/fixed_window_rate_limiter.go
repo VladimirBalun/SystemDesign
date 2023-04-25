@@ -45,5 +45,5 @@ func (l *FixedWindowLimiter) Allow() bool {
 		count = atomic.LoadInt32(&l.count)
 	}
 
-	return count+1 <= int32(l.limit)
+	return count < int32(l.limit)
 }

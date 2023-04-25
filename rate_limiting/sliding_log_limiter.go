@@ -1,7 +1,6 @@
 package rate_limiting
 
 import (
-	"context"
 	"sync"
 	"time"
 )
@@ -13,7 +12,7 @@ type SlidingLogLimiter struct {
 	mutex    sync.Mutex
 }
 
-func NewSlidingLogLimiter(ctx context.Context, limit int, interval time.Duration) *SlidingLogLimiter {
+func NewSlidingLogLimiter(limit int, interval time.Duration) *SlidingLogLimiter {
 	return &SlidingLogLimiter{
 		limit:    limit,
 		interval: interval,
