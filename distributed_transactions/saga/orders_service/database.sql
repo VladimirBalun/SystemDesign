@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS status (
+    id   BIGSERIAL PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
+INSERT INTO status (id, name) VALUES (1, 'PENDING'), (2, 'CREATED') ON CONFLICT DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS order (
+    id         BIGSERIAL PRIMARY KEY,
+    user_id    BIGINT NOT NULL,
+    status_id  BIGINT NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    goods      VARCHAR(100)[] NOT NULL,
+    FOREIGN KEY (status_id) REFERENCES status(id)
+);
